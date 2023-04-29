@@ -5,15 +5,16 @@ import { twMerge } from "tailwind-merge";
 import { IconType } from "react-icons";
 
 const buttonVariants = cva(
-  "flex flex-row justify-center items-center gap-3 rounded",
+  "flex flex-row justify-center items-center gap-3 rounded px-3 py-2",
   {
     variants: {
       variant: {
         default: "bg-[#60C6FF] text-white",
-        outline: "border-2 button-shadow --font-poppins text-[14px]",
+        outline: "border-2 button-shadow text-[14px]",
       },
       size: {
-        default: "w-[369px] px-3 py-2",
+        default: "w-[300px]",
+        lg: "w-[370px]",
         sm: "w-[200px]",
       },
     },
