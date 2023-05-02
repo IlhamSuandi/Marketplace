@@ -25,4 +25,5 @@ body {
     )
     rgb(var(--background-start-rgb));
   font-family: var(--font-poppins);
+  overflow: hidden;
 }

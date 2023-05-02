@@ -5,7 +5,7 @@ import { twMerge } from "tailwind-merge";
 import { IconType } from "react-icons";
 
 const buttonVariants = cva(
-  "flex flex-row justify-center items-center gap-3 rounded px-3 py-2",
+  "flex flex-row justify-center items-center gap-3 rounded px-3 py-2 hover:opacity-60 duration-150",
   {
     variants: {
       variant: {
@@ -25,7 +25,7 @@ const buttonVariants = cva(
   }
 );
 
-interface Props
+interface IProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   label: string;
@@ -33,7 +33,7 @@ interface Props
   RightIcon?: IconType;
 }
 
-export default function button({
+const Button = ({
   label,
   LeftIcon,
   RightIcon,
@@ -41,7 +41,7 @@ export default function button({
   size,
   variant,
   ...rest
-}: Props) {
+}: IProps) => {
   return (
     <button
       className={twMerge(clsx(buttonVariants({ variant, size, className })))}
@@ -52,4 +52,6 @@ export default function button({
       {RightIcon && <RightIcon size={25} />}
     </button>
   );
-}
+};
+
+export default Button;

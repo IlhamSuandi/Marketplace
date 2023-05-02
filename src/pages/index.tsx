@@ -1,6 +1,12 @@
-import Textfield from "@/components/textfield";
-import Login from "./login";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 export default function Home() {
-  return <div className="flex justify-center items-center"></div>;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/login");
+  }, [router]);
+
+  return <div></div>;
 }
