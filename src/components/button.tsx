@@ -5,7 +5,7 @@ import { twMerge } from "tailwind-merge";
 import { IconType } from "react-icons";
 
 const buttonVariants = cva(
-  "flex flex-row justify-center items-center gap-3 rounded px-3 py-2 hover:opacity-60 duration-150",
+  "flex flex-row justify-center items-center gap-3 rounded px-3 py-2 hover:opacity-60 duration-150 disabled:opacity-60",
   {
     variants: {
       variant: {
