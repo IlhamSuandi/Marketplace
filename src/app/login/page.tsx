@@ -10,13 +10,13 @@ import React, { createRef } from "react";
 import Textfield from "@/components/textfield";
 import { CiLock, CiMail } from "react-icons/ci";
 import { FcGoogle } from "react-icons/fc";
-import Loading from "@/components/loading";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Lottie from "lottie-web";
 import animation from "@/assets/animation/animation.json";
+import { poppins } from "../fonts";
 
 type IForm = {
   email: string;
@@ -24,7 +24,6 @@ type IForm = {
 };
 
 export default function Login() {
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [hidePassword, setHidePassword] = React.useState<boolean>(true);
   let animationRef = createRef<HTMLDivElement>();
 
@@ -42,8 +41,7 @@ export default function Login() {
     register,
     handleSubmit,
     setFocus,
-    watch,
-    formState: { errors, isValid },
+    formState: { isValid },
   } = useForm<IForm>({ mode: "onChange", resolver: yupResolver(formSchema) });
 
   const onSubmit: SubmitHandler<IForm> = (data) => {
@@ -57,11 +55,11 @@ export default function Login() {
       renderer: "svg",
       loop: true,
       autoplay: true,
+      path: "https://assets8.lottiefiles.com/packages/lf20_ikvz7qhc.json",
       animationData: animation,
     });
 
     if (anim.isLoaded) {
-      setIsLoading(false);
       setFocus("email");
     }
 
@@ -69,8 +67,7 @@ export default function Login() {
   }, []);
 
   return (
-    <div className="w-full h-screen">
-      {isLoading && <Loading />}
+    <div className={`w-full h-screen ${poppins.className}`}>
       <div
         className={`w-full h-screen overflow-x-hidden text-[#A7A7A7] flex flex-col items-center justify-center xl:p-5 xl:justify-around`}
       >
@@ -84,8 +81,8 @@ export default function Login() {
           className="hidden xl:block"
         />
 
-        {/* LOTTIE ANIMATION */}
         <div className="w-fit lg:w-full lg:flex lg:justify-evenly lg:gap-12">
+          {/* LOTTIE ANIMATION */}
           <div className="hidden xl:flex xl:justify-center xl:items-center">
             <div className="absolute w-[470px] h-[470px] rounded-full bg-[#ED9A9A] " />
             <div className="w-[600px] max-w-[50vw]" ref={animationRef} />

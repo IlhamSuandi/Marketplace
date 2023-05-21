@@ -1,15 +1,12 @@
 // These styles apply to every route in the application
 
-export const metadata = {
-  title: "Edution - Login",
-  description: "Edution login page",
-};
 import { ReactNode } from "react";
+import { VideoConferenceProvider } from "../context/videoConferece";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <main>
+      <VideoConferenceProvider>{children}</VideoConferenceProvider>
+    </main>
   );
 }

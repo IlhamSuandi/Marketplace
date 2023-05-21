@@ -2,12 +2,7 @@
 import "../styles/globals.css";
 import { Poppins } from "next/font/google";
 import { ReactNode } from "react";
-
-export const poppins = Poppins({
-  weight: ["300", "400", "600"],
-  subsets: ["latin"],
-  variable: "--font-poppins",
-});
+import { VideoConferenceProvider } from "./context/videoConferece";
 
 export const metadata = {
   title: "Edution",
@@ -16,11 +11,8 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${poppins.variable} font-poppins font-normal bg-soft-blue`}
-    >
-      <body suppressHydrationWarning={true}>{children}</body>
+    <html lang="en">
+      <body>{children}</body>
     </html>
   );
 }
