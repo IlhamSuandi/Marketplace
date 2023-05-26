@@ -15,24 +15,33 @@ export function VideoConferenceProvider({
   const [users, setUsers] = React.useState<Array<string>>([]);
   const [usersLength, setUsersLength] = React.useState<number>();
   const [stream, setStream] = React.useState<MediaStream>();
+  const [selectedAudioDevice, setSelectedAudioDevice] =
+    React.useState<string>();
+
+  const [supportedDevices, setSupportedDevices] =
+    React.useState<MediaDeviceInfo[]>();
   let myVideo = React.useRef<HTMLVideoElement>(
     null
   ) as MutableRefObject<HTMLVideoElement>;
 
   React.useEffect(() => {
+    stream?.getTracks().forEach((track) => {
+      track.stop();
+    });
     navigator.mediaDevices.enumerateDevices().then((devices) => {
+      setSupportedDevices(devices);
       let cam = devices.find(function (device) {
         return device.kind === "videoinput";
       });
 
-      let mic = devices.find(function (device) {
-        return device.label === "USB Audio Device Mono";
-      });
+      // let mic = devices.find(function (device) {
+      //   return device.label === "USB Audio Device Mono";
+      // });
 
       navigator.mediaDevices
         .getUserMedia({
           audio: {
-            deviceId: mic?.deviceId,
+            deviceId: selectedAudioDevice,
             autoGainControl: false,
             echoCancellation: false,
             noiseSuppression: true,
@@ -41,7 +50,6 @@ export function VideoConferenceProvider({
         })
         .then((userMedia) => {
           setStream(userMedia);
-          userMedia;
           // myVideo.current.srcObject = userMedia;
 
           // const audioContext = new AudioContext();
@@ -81,7 +89,7 @@ export function VideoConferenceProvider({
     socket.on("meeting-users", (users) => {
       setUsers(users);
     });
-  }, [socket, myVideo]);
+  }, [socket, myVideo, selectedAudioDevice]);
 
   const joinRoom = (roomId: string, username: string) => {
     socket.emit("meeting", roomId, username);
@@ -98,6 +106,10 @@ export function VideoConferenceProvider({
         usersLength,
         myVideo,
         stream,
+        supportedDevices,
+        setSupportedDevices,
+        selectedAudioDevice,
+        setSelectedAudioDevice,
       }}
     >
       {children}
