@@ -2,7 +2,6 @@
 import "../styles/globals.css";
 import { Poppins } from "next/font/google";
 import { ReactNode } from "react";
-import { VideoConferenceProvider } from "./context/videoConferece";
 
 export const metadata = {
   title: "Edution",

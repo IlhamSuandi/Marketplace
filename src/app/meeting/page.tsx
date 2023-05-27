@@ -6,26 +6,30 @@ import React, { MutableRefObject } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import profilePicture from "@/assets/image/limbo.jpeg";
 import { useRouter } from "next/navigation";
-import { SocketProvider, socket } from "../context/videoConferece";
+import { SocketProvider } from "../context/videoConferece";
 import Image from "next/image";
 
 interface IContext {
   joinRoom: (roomId: string, username: string) => void;
   stream: MediaStream;
-  supportedDevices: MediaDeviceInfo[];
+  audioInputDevices: MediaDeviceInfo[];
   selectedAudioDevice: string;
   setSelectedAudioDevice: React.Dispatch<
     React.SetStateAction<string | undefined>
   >;
+  permissionGranted: boolean;
+  muteMic: () => boolean | undefined;
 }
 
 function Meeting() {
   const {
     joinRoom,
     stream,
-    supportedDevices,
+    audioInputDevices,
     selectedAudioDevice,
     setSelectedAudioDevice,
+    permissionGranted,
+    muteMic,
   } = React.useContext<IContext>(SocketProvider);
   const { register, handleSubmit } = useForm<{
     name: string;
@@ -33,15 +37,7 @@ function Meeting() {
     message: string;
   }>();
 
-  const audioDevices = supportedDevices?.filter(
-    (device: MediaDeviceInfo) => device.kind === "audioinput"
-  );
-
-  // const [selectedAudioDevice, setSelectedAudioDevice] =
-  //   React.useState<string>();
   const router = useRouter();
-
-  let interval: string | number | NodeJS.Timer | undefined;
 
   const onSubmit: SubmitHandler<{
     name: string;
@@ -59,56 +55,7 @@ function Meeting() {
 
   let divRef = React.useRef<HTMLDivElement>(null);
 
-  const getVideoSrc = ({
-    mic,
-    cam,
-  }: {
-    mic: string;
-    cam: boolean | MediaDeviceInfo;
-  }) => {
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: {
-          deviceId: {
-            exact: mic,
-          },
-          autoGainControl: false,
-          echoCancellation: false,
-          noiseSuppression: true,
-        },
-        video: cam,
-      })
-      .then((userMedia) => {
-        myVideo.current.srcObject = userMedia;
-
-        const audioContext = new AudioContext();
-        const analyser = audioContext.createAnalyser();
-        const microphone = audioContext.createMediaStreamSource(userMedia);
-
-        analyser.smoothingTimeConstant = 0.8;
-        analyser.fftSize = 1024;
-        microphone.connect(analyser);
-
-        interval = setInterval(() => {
-          const array = new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteFrequencyData(array);
-          const arraySum = array.reduce((a, value) => a + value, 0);
-          const average = arraySum / array.length;
-          console.log(Math.round(average) / 10);
-          if (Math.round(average) > 5) {
-            divRef.current!.style.boxSizing = "border-box";
-            divRef.current!.style.webkitBoxSizing = "border-box";
-            divRef.current!.style.border = "4px solid lime";
-          } else {
-            divRef.current!.style.border = "4px solid black";
-          }
-        });
-
-        return interval;
-      });
-  };
-
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     try {
       const audioContext = new AudioContext();
       const analyser = audioContext.resume().then(() => {
@@ -125,7 +72,7 @@ function Meeting() {
         (await analyser).getByteFrequencyData(array);
         const arraySum = array.reduce((a, value) => a + value, 0);
         const average = arraySum / array.length;
-        console.log(average / 100);
+        // console.log(average / 100);
         if (Math.round(average) > 5) {
           divRef.current!.style.boxSizing = "border-box";
           divRef.current!.style.webkitBoxSizing = "border-box";
@@ -140,7 +87,7 @@ function Meeting() {
     } catch (error) {
       console.error(error);
     }
-  }, [stream, selectedAudioDevice]);
+  }, [stream]);
 
   return (
     <div className="h-screen flex flex-col justify-center items-center">
@@ -181,16 +128,24 @@ function Meeting() {
               setSelectedAudioDevice(e.target.value);
             }}
           >
-            {audioDevices?.map((device: MediaDeviceInfo, index: number) => (
-              <option
-                key={index}
-                value={device.deviceId}
-                selected={device.deviceId === selectedAudioDevice}
-              >
-                {device.label}
-              </option>
-            ))}
+            {!permissionGranted ? (
+              <option>Please allow the permissions</option>
+            ) : (
+              audioInputDevices?.map(
+                (device: MediaDeviceInfo, index: number) => (
+                  <option
+                    key={index}
+                    value={device.deviceId}
+                    defaultValue={selectedAudioDevice}
+                  >
+                    {device.label}
+                  </option>
+                )
+              )
+            )}
           </select>
+
+          <button onClick={muteMic}>mute </button>
         </div>
       </div>
     </div>

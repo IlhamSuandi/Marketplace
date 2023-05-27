@@ -17,66 +17,27 @@ export function VideoConferenceProvider({
   const [stream, setStream] = React.useState<MediaStream>();
   const [selectedAudioDevice, setSelectedAudioDevice] =
     React.useState<string>();
+  const [permissionGranted, setPermissionGranted] =
+    React.useState<boolean>(false);
 
-  const [supportedDevices, setSupportedDevices] =
+  const [audioInputDevices, setAudioInputDevices] =
     React.useState<MediaDeviceInfo[]>();
+  const [videoInputDevices, setVideoInputDevices] =
+    React.useState<MediaDeviceInfo[]>();
+
   let myVideo = React.useRef<HTMLVideoElement>(
     null
   ) as MutableRefObject<HTMLVideoElement>;
 
   React.useEffect(() => {
-    stream?.getTracks().forEach((track) => {
-      track.stop();
-    });
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      setSupportedDevices(devices);
-      let cam = devices.find(function (device) {
-        return device.kind === "videoinput";
-      });
+    getStreams();
+  }, [myVideo, selectedAudioDevice]);
 
-      // let mic = devices.find(function (device) {
-      //   return device.label === "USB Audio Device Mono";
-      // });
+  React.useEffect(() => {
+    getDevices();
+  }, [selectedAudioDevice, audioInputDevices]);
 
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: {
-            deviceId: selectedAudioDevice,
-            autoGainControl: false,
-            echoCancellation: false,
-            noiseSuppression: true,
-          },
-          video: cam,
-        })
-        .then((userMedia) => {
-          setStream(userMedia);
-          // myVideo.current.srcObject = userMedia;
-
-          // const audioContext = new AudioContext();
-          // const analyser = audioContext.createAnalyser();
-          // const microphone = audioContext.createMediaStreamSource(userMedia);
-
-          // analyser.smoothingTimeConstant = 0.8;
-          // analyser.fftSize = 1024;
-          // microphone.connect(analyser);
-
-          // setInterval(() => {
-          //   const array = new Uint8Array(analyser.frequencyBinCount);
-          //   analyser.getByteFrequencyData(array);
-          //   const arraySum = array.reduce((a, value) => a + value, 0);
-          //   const average = arraySum / array.length;
-          //   console.log(myVideo.current.srcObject);
-          //   if (Math.round(average) >= 10) {
-          //     myVideo.current.style.boxSizing = "border-box";
-          //     myVideo.current.style.webkitBoxSizing = "border-box";
-          //     myVideo.current.style.border = "4px solid lime";
-          //   } else {
-          //     myVideo.current.style.border = "4px solid transparent";
-          //   }
-          // }, 100);
-        });
-    });
-
+  React.useEffect(() => {
     socket.on("userID", (userId) => {
       console.log(userId);
       setMe(userId);
@@ -89,11 +50,49 @@ export function VideoConferenceProvider({
     socket.on("meeting-users", (users) => {
       setUsers(users);
     });
-  }, [socket, myVideo, selectedAudioDevice]);
+  }, [socket]);
 
   const joinRoom = (roomId: string, username: string) => {
     socket.emit("meeting", roomId, username);
   };
+
+  function getDevices() {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      const mic = devices.filter((device) => device.kind === "audioinput");
+      const cam = devices.filter((device) => device.kind === "videoinput");
+      setAudioInputDevices(mic);
+      setVideoInputDevices(cam);
+    });
+  }
+
+  function getStreams() {
+    stream?.getTracks().forEach((track) => {
+      track.stop();
+    });
+
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: {
+          deviceId: selectedAudioDevice,
+          autoGainControl: false,
+          echoCancellation: false,
+          noiseSuppression: true,
+        },
+        video: false,
+      })
+      .then((userMedia) => {
+        setStream(userMedia);
+        setPermissionGranted(true);
+      })
+      .catch((err) => setPermissionGranted(false));
+  }
+
+  function muteMic() {
+    if (stream) {
+      return (stream.getAudioTracks()[0].enabled =
+        !stream.getAudioTracks()[0].enabled);
+    }
+  }
 
   return (
     <SocketProvider.Provider
@@ -106,10 +105,13 @@ export function VideoConferenceProvider({
         usersLength,
         myVideo,
         stream,
-        supportedDevices,
-        setSupportedDevices,
+        audioInputDevices,
+        setAudioInputDevices,
         selectedAudioDevice,
         setSelectedAudioDevice,
+        permissionGranted,
+        getStreams,
+        muteMic,
       }}
     >
       {children}
