@@ -2,15 +2,15 @@
 
 import Button from "@/components/button";
 import Textfield from "@/components/textfield";
-import React, { MutableRefObject } from "react";
+import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import profilePicture from "@/assets/image/limbo.jpeg";
 import { useRouter } from "next/navigation";
 import { SocketProvider } from "../context/videoConferece";
-import Image from "next/image";
+import MeetingVideo from "@/components/meetingVideo";
+import Peer from "peerjs";
 
 interface IContext {
-  joinRoom: (roomId: string, username: string) => void;
+  joinRoom: (roomId: string, username: string, peerId?: string) => void;
   stream: MediaStream;
   audioInputDevices: MediaDeviceInfo[];
   selectedAudioDevice: string;
@@ -19,6 +19,7 @@ interface IContext {
   >;
   permissionGranted: boolean;
   muteMic: () => boolean | undefined;
+  me: Peer | undefined;
 }
 
 function Meeting() {
@@ -30,6 +31,7 @@ function Meeting() {
     setSelectedAudioDevice,
     permissionGranted,
     muteMic,
+    me,
   } = React.useContext<IContext>(SocketProvider);
   const { register, handleSubmit } = useForm<{
     name: string;
@@ -44,50 +46,9 @@ function Meeting() {
     roomID: string;
     message: string;
   }> = (data) => {
-    joinRoom(data.roomID, data.name);
-    myVideo.current.srcObject = null;
+    joinRoom(data.roomID, data.name, me?.id);
     router.push(`/meeting/room?id=${data.roomID}&username=${data.name}`);
   };
-
-  let myVideo = React.useRef<HTMLVideoElement>(
-    null
-  ) as MutableRefObject<HTMLVideoElement>;
-
-  let divRef = React.useRef<HTMLDivElement>(null);
-
-  React.useLayoutEffect(() => {
-    try {
-      const audioContext = new AudioContext();
-      const analyser = audioContext.resume().then(() => {
-        const analyser = audioContext.createAnalyser();
-        const microphone = audioContext.createMediaStreamSource(stream);
-        analyser.smoothingTimeConstant = 0.3;
-        analyser.fftSize = 2048;
-        microphone.connect(analyser);
-        myVideo.current.srcObject = stream;
-        return analyser;
-      });
-      const visualizer = setInterval(async () => {
-        const array = new Uint8Array((await analyser).frequencyBinCount);
-        (await analyser).getByteFrequencyData(array);
-        const arraySum = array.reduce((a, value) => a + value, 0);
-        const average = arraySum / array.length;
-        // console.log(average / 100);
-        if (Math.round(average) > 5) {
-          divRef.current!.style.boxSizing = "border-box";
-          divRef.current!.style.webkitBoxSizing = "border-box";
-          divRef.current!.style.border = `4px solid rgba(0, 255, 56, ${
-            average / 10
-          })`;
-        } else {
-          divRef.current!.style.border = "4px solid rgba(0, 255, 56,0)";
-        }
-      }, 100);
-      return () => clearInterval(visualizer);
-    } catch (error) {
-      console.error(error);
-    }
-  }, [stream]);
 
   return (
     <div className="h-screen flex flex-col justify-center items-center">
@@ -101,22 +62,8 @@ function Meeting() {
             onClick={handleSubmit(onSubmit)}
             label="enter room"
           />
-          <div className="w-[300px] h-[200px] border bg-black rounded">
-            <div
-              ref={divRef}
-              className="w-[300px] h-[200px] flex justify-center items-center border-4 border-transparent transition-all duration-200"
-            >
-              <div>
-                <Image
-                  src={profilePicture}
-                  alt="profile pic"
-                  width={180}
-                  className="mask mask-square rounded"
-                />
-              </div>
-              <video ref={myVideo} autoPlay className="none w-0" />
-            </div>
-          </div>
+
+          <MeetingVideo stream={stream} />
         </form>
         <div className="form-control w-full max-w-xs">
           <label className="label">
@@ -127,6 +74,7 @@ function Meeting() {
             onChange={(e) => {
               setSelectedAudioDevice(e.target.value);
             }}
+            defaultValue={selectedAudioDevice}
           >
             {!permissionGranted ? (
               <option>Please allow the permissions</option>
@@ -145,7 +93,7 @@ function Meeting() {
             )}
           </select>
 
-          <button onClick={muteMic}>mute </button>
+          <button onClick={muteMic}>mute</button>
         </div>
       </div>
     </div>
