@@ -10,7 +10,7 @@ function Loading() {
         {/* LOGO */}
         <Skeleton className="hidden w-[220px] h-12 xl:block bg-slate-200" />
 
-        <div className="w-fit lg:w-full lg:flex lg:justify-evenly lg:gap-12 mb-8">
+        <div className="w-fit lg:w-full lg:flex lg:justify-evenly lg:gap-12 mb-10">
           {/* LOTTIE ANIMATION */}
           <div className="hidden xl:flex xl:justify-center xl:items-center">
             <div className="relative flex w-[470px] h-[470px] ">
@@ -26,8 +26,8 @@ function Loading() {
             <Skeleton className="w-32 h-8 m-auto mb-2 bg-slate-200" />
             <Skeleton className="w-32 h-5 m-auto bg-slate-200" />
             <div className="flex flex-col justify-center mt-10 mb-0 gap-[21px]">
-              <Skeleton className="w-full h-10 min-w-[300px] bg-slate-200" />
-              <Skeleton className="w-full h-10 min-w-[300px] bg-slate-200" />
+              <Skeleton className="w-full h-10 min-w-[200px] bg-slate-200" />
+              <Skeleton className="w-full h-10 min-w-[200px] bg-slate-200" />
 
               <div className="flex justify-end">
                 <Skeleton className="w-28 h-5 bg-slate-200" />

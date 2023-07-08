@@ -1,7 +1,7 @@
 // These styles apply to every route in the application
 import "../styles/globals.css";
-import { Poppins } from "next/font/google";
 import { ReactNode } from "react";
+import SessionProvider from "./providers/sessionProvider";
 
 export const metadata = {
   title: "Edution",
@@ -11,7 +11,9 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <SessionProvider>{children}</SessionProvider>
+      </body>
     </html>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "@/components/button";
-import Textfield from "@/components/textfield";
+import Button from "@/components/ui/button";
+import Textfield from "@/components/ui/textfield";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";

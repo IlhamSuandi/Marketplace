@@ -5,13 +5,14 @@ interface IProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type?: string;
   LeftIcon?: React.ReactNode;
   RightIcon?: React.ReactNode;
+  errors?: any;
 }
 
 const Textfield = React.forwardRef<HTMLInputElement, IProps>((props, ref) => {
-  const { label, type = "text", LeftIcon, RightIcon, ...rest } = props;
+  const { label, type = "text", LeftIcon, RightIcon, errors, ...rest } = props;
 
   return (
-    <div className={`relative h-10 w-full min-w-[200px]`}>
+    <div className={`relative w-full min-w-[200px] `}>
       {LeftIcon && (
         <div className="absolute top-4 left-4 grid h-5 w-5 -translate-y-2 place-items-center text-blue-gray-500">
           {LeftIcon}
@@ -39,6 +40,12 @@ const Textfield = React.forwardRef<HTMLInputElement, IProps>((props, ref) => {
       {RightIcon && (
         <div className="absolute top-4 right-4 grid h-5 w-5 -translate-y-2 place-items-center text-blue-gray-500">
           {RightIcon}
+        </div>
+      )}
+
+      {errors && (
+        <div className="text-left text-sm ml-5 text-danger ">
+          <p>{errors.message}</p>
         </div>
       )}
     </div>

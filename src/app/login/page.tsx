@@ -1,70 +1,21 @@
 "use client";
-
+import React from "react";
 import Image from "next/image";
 import logo from "@/assets/icon/edution.svg";
-import Button from "@/components/button";
 import graphicLogo from "@/assets/icon/graphicLogo.svg";
 import github from "@/assets/icon/github.svg";
-import Link from "next/link";
-import React, { createRef } from "react";
-import Textfield from "@/components/textfield";
-import { CiLock, CiMail } from "react-icons/ci";
-import { FcGoogle } from "react-icons/fc";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { SubmitHandler, useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import Lottie from "lottie-web";
-import animation from "@/assets/animation/animation.json";
 import { poppins } from "../fonts";
-
-type IForm = {
-  email: string;
-  password: string;
-};
+import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Loading from "@/components/ui/loading";
+import LottieAnimation from "@/components/ui/lottie";
+import LoginForm from "@/components/loginForm";
 
 export default function Login() {
-  const [hidePassword, setHidePassword] = React.useState<boolean>(true);
-  let animationRef = createRef<HTMLDivElement>();
+  const { status } = useSession();
 
-  const formSchema = yup.object().shape({
-    email: yup
-      .string()
-      .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, {
-        message: "Please enter a valid email address",
-      })
-      .required("this field is required"),
-    password: yup.string().required("this field is required"),
-  });
-
-  const {
-    register,
-    handleSubmit,
-    setFocus,
-    formState: { isValid },
-  } = useForm<IForm>({ mode: "onChange", resolver: yupResolver(formSchema) });
-
-  const onSubmit: SubmitHandler<IForm> = (data) => {
-    console.log(data);
-  };
-
-  React.useEffect(() => {
-    Lottie.setQuality("low");
-    const anim = Lottie.loadAnimation({
-      container: animationRef.current!,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-      path: "https://assets8.lottiefiles.com/packages/lf20_ikvz7qhc.json",
-      animationData: animation,
-    });
-
-    if (anim.isLoaded) {
-      setFocus("email");
-    }
-
-    return () => anim.destroy();
-  }, []);
+  // if (status === "loading") return <Loading />;
+  // if (status === "authenticated") return redirect("/");
 
   return (
     <div className={`w-full h-screen ${poppins.className}`}>
@@ -83,10 +34,7 @@ export default function Login() {
 
         <div className="w-fit lg:w-full lg:flex lg:justify-evenly lg:gap-12">
           {/* LOTTIE ANIMATION */}
-          <div className="hidden xl:flex xl:justify-center xl:items-center">
-            <div className="absolute w-[470px] h-[470px] rounded-full bg-[#ED9A9A] " />
-            <div className="w-[600px] max-w-[50vw]" ref={animationRef} />
-          </div>
+          <LottieAnimation />
 
           {/* CARD */}
           <div className="md:w-[500px] h-full md:bg-[#FFFFFF] rounded-[10px] md:shadow-card-shadow text-center p-10 mb-0">
@@ -106,98 +54,7 @@ export default function Login() {
               Welcome!
             </h1>
             <p className={`text-[16px]/[24px]`}>Log in your account</p>
-            <form
-              name="loginForm"
-              onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col justify-center mt-10 mb-0 gap-[21px]"
-            >
-              <Textfield
-                {...register("email")}
-                required
-                data-testid="email"
-                name="email"
-                id="email"
-                label="Email"
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    setFocus("password");
-                  }
-                }}
-                LeftIcon={<CiMail size={25} />}
-              />
-
-              <Textfield
-                {...register("password")}
-                required
-                data-testid="password"
-                name="password"
-                id="password"
-                label="Password"
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    isValid && handleSubmit(onSubmit);
-                  }
-                }}
-                type={hidePassword ? "password" : "text"}
-                LeftIcon={<CiLock size={25} />}
-                RightIcon={
-                  <button
-                    data-testid="hidePassword"
-                    type="button"
-                    onClick={() => setHidePassword((prev) => !prev)}
-                  >
-                    {hidePassword ? (
-                      <AiOutlineEyeInvisible size={25} />
-                    ) : (
-                      <AiOutlineEye size={25} />
-                    )}
-                  </button>
-                }
-              />
-              <div
-                className={`text-right text-[14px]/[18px] text-[#3366CC] underline decoration-solid`}
-              >
-                <Link href="#">Forgot Password?</Link>
-              </div>
-
-              <Button
-                disabled={!isValid}
-                name={!isValid ? "login" : "kon"}
-                type="submit"
-                label="Login"
-                className="md:w-full"
-              />
-
-              <div className="flex flex-nowrap justify-center items-center gap-2">
-                <div className="w-[40%] border-[#BBBBBB] border-b-[1px]"></div>
-                <p className={`text-[14px]/[21px]`}>OR</p>
-                <div className="w-[40%] border-[#BBBBBB] border-b-[1px]"></div>
-              </div>
-
-              <div>
-                <Button
-                  type="button"
-                  label="Continue with Google"
-                  variant="outline"
-                  LeftIcon={FcGoogle}
-                  className="md:w-full"
-                />
-
-                <div className="mt-5">
-                  <p className={`text-center text-[14px]/[18px]`}>
-                    Don’t have account ?{" "}
-                    <span>
-                      <Link
-                        href="#"
-                        className="text-[#3366CC] underline decoration-solid"
-                      >
-                        Sign Up
-                      </Link>{" "}
-                    </span>{" "}
-                  </p>
-                </div>
-              </div>
-            </form>
+            <LoginForm />
           </div>
         </div>
 

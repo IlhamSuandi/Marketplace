@@ -1,7 +1,7 @@
 import Image from "next/image";
-import React, { useCallback } from "react";
+import React from "react";
 import profilePicture from "@/assets/image/limbo.jpeg";
-import Button from "./button";
+import Button from "./ui/button";
 
 const MeetingVideo = ({
   stream,
